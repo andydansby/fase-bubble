@@ -1,0 +1,805 @@
+#include <stdlib.h>//standard library
+#include  "fase.h"//our sprite library
+#include "spectrum.h"
+#include "screenutils.h"
+#include <stdio.h>//being used to convert ints to strings
+//#include <math.h>
+
+#define gettile(x,y) tiles[x + (y << 4) - y ]
+
+#define gconst  20
+#define maxvx   600
+#define maxvy   600
+
+unsigned char data[20]= 
+{
+  0, 66, 17, 0,
+  8, 0, 0, 2,
+  9, 0, 0, 3,
+  10, 0, 0, 1,
+  12, 0, 0, 2
+};
+
+//globals
+char i, j;
+char killed;
+char mapx, mapy;
+char spacepressed;
+char dirbul[4];
+char num_bullets;
+char k;
+
+char buildMap;// are you currently playing
+char loop;
+char xx, yy;
+
+short x1[90] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//changed from short to unsigned char
+short y1[90] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//changed from short to unsigned char
+short tileAttribute[90] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};//read tile value
+
+/*short xx1;
+short xx2;
+short yy1;
+short yy2;*/
+short iterator;
+
+short isLevelRead;//used to read each level when loaded in memory
+
+short horizonal [3] = {0,0,0};
+short vertical [3] = {0,0,0};
+short levelPositioning [3] = {0,0,0};
+
+short count;//count how many items are in the array	
+short tile;
+
+
+
+unsigned char bob = 0;//used to print to screen
+unsigned char sue;//used to print to screen also
+unsigned char playerXpos;//used to print to screen
+unsigned char playerYpos;//used to print to screen also
+
+unsigned char level;//which game level are we on
+
+unsigned char tmpx, tmpy;
+
+short x, vx, ax;
+short y, vy, ay;
+//globals
+
+//vx velocity_X ?
+
+
+
+
+
+// ****** DEFINE FUNCTIONS, BUT PLACE THEM AT BOTTOM
+void update_scoreboard();
+
+void remove_bullet(char k);
+
+//void update_tilecode();
+
+void update_screen();
+
+void verticalEdge (short vertical[]);
+
+void horizontalEdge (short horizonal[]);
+
+void enemyStart(short level);
+
+void startingPosition (short levelPositioning[]);
+// ****** DEFINE FUNCTIONS, BUT PLACE THEM AT BOTTOM
+
+// ****** FUNCTIONS STILL WORKING ON
+void obsticleCollision (unsigned char playerX, unsigned char playerY, unsigned char level, short x1[], short y1[])
+{	
+	//these are going to be hard numbers
+	//in the shapes of the boxes that surround
+	//the obstacle.	
+	
+	short iterator;//added when moved to screenutils.h
+	short xx1,xx2,yy1,yy2;//added when moved to screenutils.h
+
+	if (level == 0)
+	{
+		//array is edges of rectangles
+		//x=4,y=4
+		//starting at 1
+		//so 4*16=64
+		//based on character position 16x16
+
+		
+		//red square
+		x1[0] = 4;
+		y1[0] = 4;
+		
+		//x1[1] = 8;
+		//y1[1] = 5;
+		
+		//moon
+		x1[2] = 13;
+		y1[2] = 8;
+		
+		x1[5] = 99;
+	}	
+	for (iterator = 0; iterator < 50; iterator++)
+	{
+
+		xx1 = (x1[iterator]<<4) -24;// xx1 = (x1[iterator]*16) - 24;
+		xx2 = (x1[iterator]<<4) + 8;// xx2 = (x1[iterator]*16) + 8;
+		yy1 = (y1[iterator]<<4) -24;// yy1 = (y1[iterator]*16) - 24;
+		yy2 = (y1[iterator]<<4) + 8;// yy2 = (y1[iterator]*16) + 8;
+		
+		
+		if (playerX > xx1 && playerX < xx2 && playerY > yy1 && playerY < yy2)
+		{
+			zx_border(6);
+		}
+		
+		//13,2 blue moon
+		//x = 186 to 215
+		// y = 9-39
+		if (playerX > 186 && playerX < 215 && playerY > 9 && playerY < 39)
+		{
+			zx_border(6);
+			x = 0x3000;
+			y = 0x1000;
+		}
+		
+		
+		if (x1[iterator] == 99)
+			break;
+	}
+	
+	xx = playerX;//xx = playerX >> 4;
+	yy = playerY;//yy = playerY >> 4;
+	//printtester2(xx,yy);
+		// tmpx= sprites[i].x>>4;
+		// tmpy= sprites[i].y>>4;	
+		
+	//printtester2(xx,yy);
+}
+
+
+void readScreenTiles (short x1[], short y1[], short tileAttribute[])
+{
+	unsigned char screenX;
+	unsigned char screenY;
+	unsigned char count;//count how many items are in the array	
+	short tile;
+	
+	//scrw is constant
+	//unsigned char *tiles= 0x5b40;
+	//only called when isLevelRead == 0
+	
+	//clear out array from prior level
+	for (tile = 0; tile < 90; tile ++)
+	{
+		x1[tile] = 99;
+		y1[tile] = 99;
+		tileAttribute[tile] = 0;
+	}
+	
+	count = 0;
+	tile = 0;
+
+	for ( screenX = 0; screenX < 15; screenX++ )
+	{
+		for ( screenY = 0; screenY < 10; screenY++ )
+		{
+			//tile = tiles[screenX * scrw + screenY];
+			tile = tiles[screenY * scrw + screenX];
+
+			//if (checking the tile <> 0)
+			//tile 0 is a blank tile to travel
+		
+			if (tile > 0)
+			{
+				//mark the x & y position and place it in the array
+				//this is where the problem lies
+				//writing to array x1
+				x1[count] = screenX;
+				y1[count] = screenY;				
+				tileAttribute[count] = tile;
+				
+				count++;//increment the counter for the next slot in array			
+			}
+		}
+	}
+
+	//M_OUTP(0xfe, 3);
+	
+	x1[count + 1] = 99;//last item in the array = 99 to know to break out early
+	//above should be reduntant since clearing all of the 
+	
+	//x1[5] = 99;//last item in the array = 99 to know to break out early
+}
+
+// ****** FUNCTIONS STILL WORKING ON
+
+
+
+main()
+{
+	start:
+	Sound(LOAD, 0);
+		
+	//is the game 128k
+	if( *is128 )
+	{
+		EI;
+		*intadr= IsrSound;
+	}
+  
+	while (1)//main menu
+	{		
+		i= inp(0xf7fe) & 0x1f;
+		
+		if( i==0x1e )//press 1, select kempston joystick
+		{
+			Input= Joystick;
+			//kempston joystick
+			//zx interface 2, port 1
+			break;
+		}
+		
+		else if( i==0x1d )//press 2, select cursor joystick
+		{
+			Input= Cursors;
+			//cursor joystick
+			break;
+		}
+		
+		else if( i==0x1b )//press 3, select keyboard control
+		{
+			Input= Keyboard;
+			//QAOP space
+			break;
+		}
+		
+		else if( i==0x17 )//press 4 redefine keys
+		{
+			Redefine();
+		}
+	}
+    
+	DI;
+	
+	//initilize variables
+	killed = 0;
+	mapx = 0;
+	mapy = 0;
+	spacepressed = 0;
+	num_bullets = 0;
+	level = 0;
+	buildMap = 0;
+	*shadow= 0;	
+	
+	//clear array on startup
+	for (iterator = 0; iterator < 50; iterator++)
+	{
+		x1[iterator] = 0;
+		y1[iterator] = 0;
+	}
+	//initilize variables
+	isLevelRead = 0;//used to read level into array
+	
+	update_scoreboard();
+
+	// initilize engine
+	INIT;
+	Sound(LOAD, 1);
+
+	// pass data to sprites and bullets
+	for ( i = 0; i < 5; i++ )
+	{
+		sprites[i].n = data[0 | i<<2],
+		sprites[i].x = data[1 | i<<2],
+		sprites[i].y = data[2 | i<<2],
+		sprites[i].f = data[3 | i<<2];
+	}
+
+	for ( i = 0; i < 4; i++ )
+	{
+		bullets[i].y = 255;
+	}
+  
+	// display the first screen at the beginning and marker
+	*screen= 0;
+	
+	while(1)//game loop
+	{
+		// this causes the engine to process a frame generating the sceneario		
+		FRAME;// we force update screen to be able to catch the tileset for the attr
+		   // M_OUTP(0xfe, 2);//changes border color	//M_OUTP(0xfe, 0);
+			
+			
+			//we need to read level into array
+			if (isLevelRead == 0)
+			{
+				//readScreenTiles(x1,y1,tileAttribute);
+				
+				//now that we have read our tiles, we need to select our starting level
+				levelPositioning[2] = ((short)level);//recast level to fit properly in array
+				startingPosition((short)levelPositioning);//call the function				
+				x = levelPositioning[0];
+				y = levelPositioning[1];
+				
+				enemyStart(level);
+		
+				isLevelRead = 1;//level has now been read
+			}
+			//note WHEN LEVEL IS COMPLETE, WE WILL NEED TO READ THE LEVEL INTO THE ARRAY
+			//I.E. /*if (isLevelComplete){	isLevelRead = 0;do something}*/
+
+			//printtester3(x,y);//this crashes game on game over
+			
+// movement of sprites
+for ( i = 1; i < 5; i++ )
+{
+	if( sprites[i].n < 128 )//if( sprites[i].n < 128 )//if( sprites[i].n < 0x80 )
+	{
+		for ( j= 0; j < num_bullets; j++ )//cycle through all of the bullets
+		{
+			//does your bullet hit a baddie, 10 is an offset from center of baddie sprite
+			if( abs(bullets[j].x-sprites[i].x) + abs(bullets[j].y-sprites[i].y) < 10)
+			{
+				sprites[i].n += 128;//sprites[i].n += 0x80;
+				remove_bullet(j);
+				tmpx= sprites[i].x>>4;
+				tmpy= sprites[i].y>>4;
+				tiles[tmpy * scrw + tmpx]= 66;//where enemy dies??
+				//tiles[tmpy * scrw + tmpx]= 68;						
+				tilepaint(tmpx, tmpy, tmpx, tmpy);						
+							
+				Sound(EFFX, 1+killed++%5);						
+							
+				*drwout= (unsigned int)update_scoreboard;
+			}
+		}
+		
+		//evaluation for Y coodinates
+		if( sprites[i].f&1 )
+		{
+			if( sprites[i].y>0 )
+			{
+				sprites[i].y--;
+			}
+				else
+				{
+					sprites[i].f ^= 1;
+				}				
+			else if ( sprites[i].y < scrh*16 )
+			{
+				sprites[i].y++;
+			}
+				else
+				{
+					sprites[i].f ^= 1;
+				}
+		}
+		//evaluation for X coodinates
+		if( sprites[i].f&2 )
+		{
+			if( sprites[i].x > 0 )
+			{
+				sprites[i].x--;
+			}				
+				else
+				{
+					sprites[i].f^= 2;
+				}				
+			else if( sprites[i].x < scrw * 16 )
+			{
+				sprites[i].x++;
+			}
+				else
+				{
+					sprites[i].f ^= 2;
+				}
+		}
+	}
+}
+		
+		//game over check
+		if( killed == 2 ) //end game
+		{
+							Sound(STOP, 0);							
+							EXIT;
+						//	Bitmap(1, 0); //this locks up game
+						//	Pause(50);
+						//	Bitmap(3, 1);//crashes
+						//	Pause(50);
+						//	Bitmap(2, 1);//this is ok
+						//	Pause(50);
+						//	Bitmap(0, 0);//crashes game. why??
+						
+							Pause(50);
+							Bitmap(2, 0);//this is ok
+							
+							buildMap = 0;
+							
+							
+							isLevelRead = 0;//reset flag to re read level
+
+							goto start;
+		}
+		
+
+		// movement of bullets
+		for ( i = 0; i < num_bullets; i++ )
+		{
+			if( dirbul[i]&3 )
+			{
+				if( dirbul[i]&1 )
+				{
+					if( bullets[i].x < scrw * 16 )
+						bullets[i].x += 4;
+					else
+						remove_bullet(i);
+				}
+				
+				else
+				{
+					if( bullets[i].x > 4 )
+						bullets[i].x -= 4;
+					else
+						remove_bullet(i);
+				}
+			}
+			
+			if( dirbul[i]&12 )
+			{
+				if( dirbul[i]&4 )
+				{
+					if( bullets[i].y<scrh*16 )
+						bullets[i].y+= 4;
+					else
+					remove_bullet(i);
+				}
+				else
+				{
+					if( bullets[i].y>4 )
+						bullets[i].y-= 4;
+					else
+						remove_bullet(i);
+				}
+			}
+		}
+	
+		//check edges
+		{
+			//vertical edge
+			vertical[0] = vy;
+			vertical[1] = ay;
+			vertical[2] = y;
+			verticalEdge(vertical);
+			vy = vertical[0];
+			ay = vertical[1];
+			y = vertical[2];
+			
+			//horizontal edge
+			horizonal[0] = vx;
+			horizonal[1] = ax;
+			horizonal[2] = x;
+			horizontalEdge(horizonal);
+			vx = horizonal[0];
+			ax = horizonal[1];
+			x = horizonal[2];
+			
+			//bob = (unsigned char)(x >> 8);//(char)(x >> 12);//x >> 8
+			//bob = (unsigned char)(y >> 8);
+			//printtester(bob);
+			//here X>>8 is from 0 to 240
+			//here Y>>8 is from 0 to 159
+			//here Y>>9 is from 0 to 207
+			//bob = (unsigned char)(x >> 8);
+			//sue = (unsigned char)(y >> 8);
+			//printtester2(bob,sue);
+			playerXpos = (unsigned char)(x >> 8);
+			playerYpos = (unsigned char)(y >> 8);			
+			obsticleCollision(playerXpos,playerYpos,level,x1,y1);			
+		}		
+		sprites[0].x = x >> 8;
+		sprites[0].y = y >> 8;
+
+		
+		//directional movement of the character
+		{
+			// motion of the protagonist
+			if( Input() & 0x01 ) // P - go right
+			{	
+				ax = vx < maxvx ? 40 : 0;
+			}
+				
+			if( Input() & 0x02 ) // O - go left
+			{	
+				ax = vx > -maxvx ? -40 : 0;
+			}
+				
+			//now we have down doing the same as up for testing
+			if( Input() & 0x04 )// A go down
+			{
+				ay = (vy < maxvy) ? 40 : 1;
+			}
+					
+			if( Input() & 0x08 )// Q go up
+			{
+				ay = (vy > -maxvy) ? -40 : -1;
+			}		
+		
+			if( Input() & 0x10 && !spacepressed && num_bullets<4 )
+			{ // Space (FIRE)
+				Sound(EFFX, 0);
+				bullets[num_bullets].x= sprites[0].x;
+				bullets[num_bullets].y= sprites[0].y;
+				i= Input() & 0x0f;
+				dirbul[num_bullets]= i ? i : 1;
+				num_bullets++;
+			}
+			spacepressed= Input() & 0x10;
+		}
+		
+		/*if (bob == 5)
+		{
+			Pause(0);
+		}
+		bob++;*/
+	
+	}
+	
+}//end of game loop
+
+
+
+void startingPosition (short levelPositioning[])
+{
+	short xxx = 0;// = levelPositioning[0];// to be used for output
+	short yyy = 0;// = levelPositioning[1];
+	short Level = levelPositioning[2];
+
+	if (Level == 0)
+	{
+		xxx = 50;
+		yyy = 120;//yyy = 16;
+		
+	}
+	
+	//to adjust to scale.
+	xxx = xxx * 256;
+	yyy = yyy * 256;
+	
+	//returns
+	levelPositioning[0] = xxx;
+	levelPositioning[1] = yyy;	
+}
+
+//Check vertical border / edges
+void verticalEdge (short vertical[])
+{
+	//mapx is char
+	//mapy is char
+	//vertical[0] = vy;
+	//vertical[1] = ay;
+	//vertical[2] = y;
+	
+	short vY1 = vertical[0];
+	short aY1 = vertical[1];
+	short Y1 = vertical[2];
+
+	//bob = (unsigned char)(Y1 >> 8);
+	//printtester(bob);
+
+	vY1 += aY1;
+	Y1 += vY1;
+	
+	
+
+	if( vY1 + 8 >> 3 )
+	{
+		aY1 = -vY1 >> 3;
+	}
+	else
+	{
+		aY1 = vY1 = 0;
+	}
+
+	if( (unsigned int)Y1 > scrh << 12 )
+	{
+		if( vY1 > 0 )
+		{
+			if( mapy < maph - 1 )
+			{
+				Y1 = scrh << 12;
+				vY1= 0;
+				zx_border(3);
+			}
+		}
+
+		//top
+		if( vY1 < 0 )
+		{
+			if( mapy < 8)
+			{
+				Y1 = 0;
+				zx_border(3);
+			}
+		}
+
+		//screen bottom
+		if( vY1 > scrh)
+		{
+			Y1 = scrh << 4;
+			zx_border(6);
+		}
+	}
+	
+	//returns
+	vertical[0] = vY1;
+	vertical[1] = aY1;
+	vertical[2] = Y1;
+}
+
+//Check horizontal border / edges
+void horizontalEdge (short horizonal[])
+{
+	//mapx is char
+	//mapy is char
+	//vertical[0] = vx;
+	//vertical[1] = ax;
+	//vertical[2] = x;
+
+	short vX1 = horizonal[0];
+	short aX1 = horizonal[1];
+	short X1 = horizonal[2];
+	
+	//printtester(vX1);//calling the print
+	//printtester(aX1);//calling the print
+	//printtester(X1);//calling the print
+	
+	//bob = (unsigned char)(X1 >> 8);
+	//printtester(bob);
+
+	vX1 += aX1;
+	X1 += vX1;
+
+	if( vX1 + 8 >> 3 )
+	{
+		aX1 = -vX1 >> 3;
+	}
+	else
+	{
+		aX1 = vX1 = 0;
+	}
+
+	if( (unsigned int)X1 > scrw << 12 )
+	{
+		if( vX1 > 0 )
+		{
+			if( mapx < mapw - 2 )
+			{
+				X1 = scrw << 12;
+			}
+		}
+
+		//screen left
+		if( vX1 < 0 )
+		{
+			if( mapx < 16)
+			{
+				X1 = 24;
+				zx_border(6);
+			}
+		}
+
+		//screen right
+		if( vX1 > scrw)
+		{
+			X1 = scrw << 12;;
+			zx_border(6);
+		}
+	}
+	//returns
+	horizonal[0] = vX1;
+	horizonal[1] = aX1;
+	horizonal[2] = X1;	
+}
+
+
+void enemyStart(short level)
+{
+	short Level = level;
+	
+	if (Level == 0)
+	{
+		//enemy 1 - 8, 8, 8, 3
+		data[4] = 8;//n 
+		data[5] = 8;//x position
+		data[6] = 8;//y position
+		data[7] = 2;//sprite number
+		
+		//enemy 2 - 9, 230, 8, 3		
+		data[8] = 9;
+		data[9] = 230;//x position
+		data[10] = 8;//y position
+		data[11] = 3;//sprite number
+		
+		//enemy 3 - 10, 5, 150, 1		
+		data[12] = 10;
+		data[13] = 5;//x position
+		data[14] = 150;//y position
+		data[15] = 1;//sprite number
+		
+		//enemy 2 - 12, 230, 150, 2		
+		data[16] = 12;
+		data[17] = 230;//x position
+		data[18] = 150;//y position
+		data[19] = 2;//sprite number
+		M_OUTP(0xfe, 1);//changes border color
+	}
+	
+	//comes after the level data is set to initilize sprites
+	for ( i = 0; i < 5; i++ )
+	{
+		sprites[i].n = data[0 | i<<2],
+		sprites[i].x = data[1 | i<<2],
+		sprites[i].y = data[2 | i<<2],
+		sprites[i].f = data[3 | i<<2];
+	}
+}
+
+
+void remove_bullet(char k)
+{
+	//char k;
+	
+	//k = *k;
+	
+	if( num_bullets )
+	{
+		num_bullets --;
+
+		while ( k < num_bullets )
+		{
+			dirbul[k] = dirbul[k + 1],
+			bullets[k].x = bullets[k + 1].x,
+			bullets[k].y = bullets[++k].y;
+			//bullets[k].y = bullets[k + 1].y;
+		}
+		bullets[k].y = 255;
+	}
+}
+
+void update_scoreboard()
+{
+	unsigned int scr, dst;
+	char count;
+	
+	scr= 0x3d80+killed*8;
+	
+	//PrintStr("cadena", 321);
+	dst= 0x403e|*shadow<<8;
+	for ( count= 0; count<8; count++ )
+	{
+		zxmem[dst]= zxmem[scr++]^0xff,
+		dst+= 0x100;
+	}
+}
+
+void update_screen()
+{
+	*screen= mapy * mapw + mapx;
+	
+	for ( j= 1; j < 5; j++ )
+	{
+		if( sprites[j].n > 0x7f )
+			sprites[j].n -= 0x80;
+	}
+}
+
+
+
+
+
+eof

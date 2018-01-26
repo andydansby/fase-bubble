@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <builddir>bubble-cppcheck-build-dir</builddir>
+    <analyze-all-vs-configs>true</analyze-all-vs-configs>
+    <paths>
+        <dir name="C:/z88dk/6-9"/>
+        <dir name="lib"/>
+    </paths>
+    <tools>
+        <tool>clang-tidy</tool>
+    </tools>
+</project>

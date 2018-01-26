@@ -1,0 +1,90 @@
+Screen Address Manipulators (pixels)
+
+source is at 
+C:\z88dk10\libsrc\spectrum\display
+
+saddr = screen address
+aaddr = attribute address
+
+px    = pixel x coordinate (0..255)
+py    = pixel y coordinate (0..191)
+pxy   = pixel (x,y) coordinate
+
+cx    = character x coordinate (0..31)
+cy    = character y coordinate (0..23)
+cxy   = character (x,y) coordinate
+
+If you wanted to find a function that converts a pixel x,y coordinate 
+to a screen address, you would look for something like zx_pxy2saddr. 
+
+Because the Spectrum stores the state of eight pixels in each byte, 
+the screen address returned by that function holds the state of 
+eight pixels. 
+
+To plot an individual point, you would write a byte there that sets 
+exactly one bit corresponding to the individual pixel you want to plot. 
+There is another function zx_px2bitmask() that will tell you what byte 
+to write given an x coordinate and we will see how that is used in the 
+example below.
+
+/* C source start */
+
+  #include <arch/zx.h>
+  #include <stdlib.h>
+
+void plot(unsigned char x, unsigned char y)
+{
+	*zx_pxy2saddr(x,y) |= zx_px2bitmask(x);
+}
+
+int main(void)
+{
+	unsigned char i;
+
+	zx_cls(PAPER_WHITE);
+   
+	for( i=0; i<15; i++ )
+	{
+		plot(rand()%256, rand()%192);      
+	}
+	return 0;
+}
+/* C source end */
+
+Screen Address Manipulators (pixels)
+uchar *zx_cyx2saddr(uchar row, uchar col)//character address
+uchar *zx_cy2saddr(uchar row)//row address
+uchar *zx_pxy2saddr(uchar xcoord, uchar ycoord, uchar *mask)
+uchar *zx_py2saddr(uchar ycoord)
+uint zx_saddr2cx(void *pixeladdr)
+uint zx_saddr2cy(void *pixeladdr)
+uint zx_saddr2px(void *pixeladdr, uchar mask)
+uint zx_saddr2py(void *pixeladdr)
+uchar *zx_saddr2aaddr(void *pixeladdr)
+uchar *zx_saddrcdown(void *pixeladdr)
+uchar *zx_saddrcleft(void *pixeladdr)
+uchar *zx_saddrcright(void *pixeladdr)
+uchar *zx_saddrcup(void *pixeladdr)
+uchar *zx_saddrpdown(void *pixeladdr)
+uchar *zx_saddrpleft(void *pixeladdr, uchar *mask)
+uchar *zx_saddrpright(void *pixeladdr, uchar *mask)
+uchar *zx_saddrpup(void *pixeladdr)
+
+Attribute Address Manipulators (attr)
+uchar *zx_cyx2aaddr(uchar row, uchar col)//character address
+uchar *zx_cy2aaddr(uchar row)//row address
+uchar *zx_pxy2aaddr(uchar xcoord, uchar ycoord)
+uchar *zx_py2aaddr(uchar ycoord)
+uint zx_aaddr2cx(void *attraddr) //
+uint zx_aaddr2cy(void *attraddr)
+uint zx_aaddr2px(void *attraddr)
+uint zx_aaddr2py(void *attraddr)
+uchar *zx_aaddr2saddr(void *attraddr)
+uchar *zx_aaddrcdown(void *attraddr)
+uchar *zx_aaddrcleft(void *attraddr)
+uchar *zx_aaddrcright(void *attraddr)
+uchar *zx_aaddrcup(void *attraddr)
+
+
+try to research / use
+uchar *zx_pxy2aaddr(uchar xcoord, uchar ycoord)

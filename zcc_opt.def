@@ -1,0 +1,27 @@
+
+IF !DEFINED_ANSIstdio
+	defc	DEFINED_ANSIstdio = 1
+	defc ANSIstdio = 0
+ENDIF
+
+
+IF !DEFINED_CLIB_MALLOC_HEAP_SIZE 
+	defc	DEFINED_CLIB_MALLOC_HEAP_SIZE  = 1
+	defc CLIB_MALLOC_HEAP_SIZE  = 10000
+ENDIF
+
+
+IF !DEFINED_myzorg
+	DEFINE DEFINED_myzorg
+	defc myzorg = 32772
+ENDIF
+IF !NEED_floatpack
+	DEFINE	NEED_floatpack
+ENDIF
+
+
+IF !DEFINED_ministdio
+	defc	DEFINED_ministdio = 1
+	defc ministdio = 0
+ENDIF
+

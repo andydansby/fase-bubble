@@ -1,0 +1,13 @@
+tmode   3
+smooth  1
+clipup  2
+clipdn  2
+cliphr  1
+safevr  1
+safehr  1
+offsex  1
+offsey  3
+notabl  1
+bullet  1
+bulmax  4
+sprmax  7

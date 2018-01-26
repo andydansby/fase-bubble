@@ -1,0 +1,59 @@
+commented out functions and code to debug.
+
+
+		//we need to read level into array
+		if (isLevelRead == 0)
+		{
+			FRAME;// we force update screen to be able to catch the tile-set for the attributes
+			
+			
+			readScreenTiles(x1,y1,tileAttribute);
+			//now that we have read our tiles, we need to select our starting level
+			
+			levelPositioning[2] = ((short)level);//recast level to fit properly in array 
+			startingPosition((short)levelPositioning);
+			x = levelPositioning[0];
+			y = levelPositioning[1];
+				
+			enemyStart(level);
+		
+			isLevelRead = 1;//level has now been read
+				
+			enemySlowDown = 0;
+			enemySpeedUp --;//lower is faster
+			if (enemySpeedUp < 0) enemySpeedUp = 0;
+			
+			//artificial stupidity part 2
+			//enemy1Status = 0;
+			//enemy2Status = 0;
+			//enemy3Status = 0;
+			//enemy4Status = 0;
+		}
+		
+		
+		
+
+			//	enemyAI();
+			
+			
+			
+			
+
+		//game over check
+		if( killed == 1 ) //end game
+		{
+			Sound(STOP, 0);							
+			EXIT;
+			//	Bitmap(1, 0)
+			//	Pause(50);
+			//	Bitmap(3, 1);
+			//	Pause(50);
+			//	Bitmap(2, 1);//this is ok
+			//	Pause(50);
+			//	Bitmap(0, 0);//crashes game. why??						
+			Pause(50);
+			Bitmap(2, 0);							
+			//buildMap = 0;			
+			//isLevelRead = 0;//reset flag to re read level
+			//goto start;
+		}
