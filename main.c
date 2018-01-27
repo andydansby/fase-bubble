@@ -131,7 +131,7 @@ void enemyAI(unsigned char enemyData[], unsigned char playerX, unsigned char pla
 	//<< left shift 3 bits
 
 
-	printtester1(decision);// comment this when not testing	
+	//printtester1(decision);// comment this when not testing	
 	//Pause(4);
 
 	
