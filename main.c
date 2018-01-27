@@ -123,7 +123,9 @@ void enemyAI(unsigned char enemyData[], unsigned char playerX, unsigned char pla
 	enemyStatus = enemyData[4];
 	
 	decision = SHR3 %4;//our random number from the macro
-	//255 will go to 32640
+	//255 will max out to 32640
+	// 5 which is what we are using in this case will max out to 640
+	
 	//<< left shift 7 bits
 	//>> right shift 5 bits
 	//<< left shift 3 bits
