@@ -3,7 +3,7 @@
 ////////////////////////////////////
 
 //extern long heap(50000);
-#pragma output CLIB_MALLOC_HEAP_SIZE = 10000
+//#pragma output CLIB_MALLOC_HEAP_SIZE = 10000
 
 
 unsigned char data[20]= 
