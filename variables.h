@@ -97,7 +97,7 @@ short squaredRadius, squaredDifferenceX, squaredDifferenceY;//these have to be s
 //these temporary variables are to be used with functions
 
 
-static unsigned char jz,jsr=5;
+static unsigned short jz,jsr=5;//used in randomizer
 
 
 

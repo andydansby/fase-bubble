@@ -13,6 +13,12 @@
 //#define SHR3 (jz=jsr, jsr^=(jsr<<7), jsr^=(jsr>>5), jsr^=(jsr<<3),jz+jsr)
 
 
+//255 will go to 32640
+
+//<< left shift 7 bits
+//>> right shift 5 bits
+//<< left shift 3 bits
+
 #define SHR3 (jz=jsr, jsr^=(jsr<<7), jsr^=(jsr>>5), jsr^=(jsr<<3),jz+jsr)
 
 
@@ -103,13 +109,9 @@ unsigned int RND(unsigned int range) {
 void enemyAI(unsigned char enemyData[], unsigned char playerX, unsigned char playerY)
 {
 	unsigned char enemyX,enemyY,enemyF,enemyImage,enemyStatus;
-//	unsigned char randomNumber;
-	unsigned char decision;
+	unsigned short decision;
 	unsigned char range;
-//	unsigned char y2,y3,y4;
 	unsigned char randombit2;
-	
-
 	
 	range = 4;//hard number to say our randomize is from 0 to 4
 	
@@ -120,17 +122,16 @@ void enemyAI(unsigned char enemyData[], unsigned char playerX, unsigned char pla
 	enemyF = enemyData[3];
 	enemyStatus = enemyData[4];
 	
-//	randombit2 = SHR3;	
-//	decision = randombit2 %4;
+	decision = SHR3 %4;//our random number from the macro
+	//255 will go to 32640
+	//<< left shift 7 bits
+	//>> right shift 5 bits
+	//<< left shift 3 bits
 
 
-//	printtester1(randombit2);//printtester1(decision);// 23672	
+	printtester1(decision);// comment this when not testing	
 	//Pause(4);
 
-	//printtester2(sprites[1].x, sprites[1].y);
-	//printtester2(enemyX, north);
-	//printtester1(tempX);
-	//printtester4(enemyStatus);//artificial stupidity 2
 	
 	//0 == enemy chasing
 	//1 == enemy retreating
