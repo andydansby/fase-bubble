@@ -1,6 +1,9 @@
 rem compiling options
 
+
+
 @echo off
+
 
 rem if not exist z88dkenv.bat (
 rem   echo.
@@ -8,10 +11,14 @@ rem  echo Error: z88dkenv.bat doesn't exist. Please copy it into this folder.
 rem   exit /b 1
 rem )
 
+
+
 echo #########################
 echo #### remove old TAP  ####
 echo #########################
 del game.tap
+
+
 
 echo #########################
 echo ## compile with        ##
@@ -23,17 +30,11 @@ echo #########################
 echo #### setting paths   ####
 echo #########################
 rem /////////////////////////////////////////////////
-SET PATH=%PATH%;c:\z88dk
-SET Z80_OZFILES=C:\z88dk\lib
-SET ZCCCFG=C:\z88dk\lib\config
-SET PATH=C:\z88dk\bin;%PATH%
+SET PATH=%PATH%;c:\z88dk10
+SET Z80_OZFILES=C:\z88dk10\lib
+SET ZCCCFG=C:\z88dk10\lib\config
+SET PATH=C:\z88dk10\bin;%PATH%
 SET Z88DK_ENV_id074741=true
-
-rem SET PATH=%PATH%;c:\z88dk
-rem SET Z80_OZFILES=C:\z88dk\lib
-rem SET ZCCCFG=C:\z88dk\lib\config
-rem SET PATH=C:\z88dk\bin;%PATH%
-rem SET Z88DK_ENV_id074741=true
 rem /////////////////////////////////////////////////
 
 
@@ -82,23 +83,9 @@ rem call z88dkenv.bat
 
 echo #######################
 echo ## ready to compiled ##
-echo ## CHECK FOR ERRORS  ##
-echo ##      HERE         ##
-echo #######################
-rem zcc +zx -zorg=32772 -O3 -z80-verb main.c -o build\main.bin -lndos
-rem zcc +zx -zorg=32772 -O3 -vn main.c -o build\main.bin -lndos
-zcc +zx -zorg=32772 -O3 -vn -m main.c -o build\main.bin -lndos
-
-
-
-
-rem -clib=sdcc_iy
-echo #######################
-echo ## ready to compiled ##
-echo ## CHECK FOR ERRORS  ##
-echo ##      HERE         ##
 echo #######################
 
+zcc +zx -zorg=32772 -O3 -vn main.c -o build\main.bin -lndos
 
 echo ######################################
 echo ##File main.bin compiled from main.c##
@@ -115,12 +102,12 @@ lib\bin\sjasmplus asm\loader.asm
 
 if exist build\player.zx7b (
   lib\bin\gentape game.tap                    ^
-            basic 'game' 10  build\loader.bin  ^
+            basic 'game' 0  build\loader.bin  ^
              data           build\engine.zx7b ^
              data           build\player.zx7b
 ) else (
   lib\bin\gentape game.tap                    ^
-            basic 'game' 10  build\loader.bin  ^
+            basic 'game' 0  build\loader.bin  ^
              data           build\engine.zx7b
 )
 

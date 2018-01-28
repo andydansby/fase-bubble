@@ -1,0 +1,169 @@
+void enemyAI()
+{
+	//tiles array is unsigned char
+	short decision;
+	
+	short tmpx, tmpy;
+	unsigned char tileType;
+	
+	char north, south, east, west;
+	char northBarrierCheck, southBarrierCheck;
+	char eastBarrierCheck, westBarrierCheck;
+				
+				west = (sprites[0].x >> 4) - 1;
+				east = (sprites[0].x >> 4) + 1;
+				south  = (sprites[0].y >> 4) + 1;
+				north  = (sprites[0].y >> 4) - 1;
+				
+				//enemy sprites
+				tmpx = sprites[0].x >> 4;
+				tmpy = sprites[0].y >> 4;
+				tileType = tiles[tmpy * scrw + tmpx];
+				
+				westBarrierCheck  = tiles[tmpy * scrw + west];
+				eastBarrierCheck  = tiles[tmpy * scrw + west];
+				northBarrierCheck = tiles[north * scrw + tmpx];
+				southBarrierCheck = tiles[south * scrw + tmpx];
+			//	if (
+				/*
+					tmpx= sprites[i].x>>4;
+					tmpy= sprites[i].y>>4;
+					
+						if ( tiles[tmpy*scrw+tmpx]== ? ){
+							do stuff
+						}*/
+				
+				printtester3(tmpx, tmpy);
+				printtester4(north);//printtester1(tileType);
+		
+		
+	decision = 100;//decision = 3;//decision = RND(5);
+	
+	if (decision == 0)
+	{
+		//do nothing
+	}
+	
+	if (decision == 1)
+	{
+		//move toward player y
+		if (sprites[i].y > playerYpos)
+		{
+			sprites[i].y--;
+		}		
+		if (sprites[i].y < playerYpos)
+		{
+			sprites[i].y++;
+		}
+	}	
+	if (decision == 2)
+	{
+		//move toward player x
+		if (sprites[i].x > playerXpos)
+		{
+			sprites[i].x--;
+		}
+		if (sprites[i].x < playerXpos)
+		{
+			sprites[i].x++;
+		}
+	}
+	if (decision == 3)
+	{
+		//move toward player x and y
+		if (sprites[i].x > playerXpos)
+		{
+			sprites[i].x--;
+		}
+		if (sprites[i].x < playerXpos)
+		{
+			sprites[i].x++;
+		}
+		if (sprites[i].y > playerYpos)
+		{
+			sprites[i].y--;
+		}
+		if (sprites[i].y < playerYpos)
+		{
+			sprites[i].y++;
+		}
+	}
+
+	if (decision == 4)
+	{//stop just shy of the players position, like a game of chicken
+		if (sprites[i].x > playerXpos + 16)
+		{
+			sprites[i].x --;
+		}
+		if (sprites[i].x < playerXpos - 16)
+		{
+			sprites[i].x ++;
+		}
+		
+		if (sprites[i].y > playerYpos + 16)
+		{
+			sprites[i].y --;
+		}
+		if (sprites[i].y < playerYpos - 16)
+		{
+			sprites[i].y ++;
+		}
+	}
+	
+	
+	if (decision == 99)
+	{
+		if (sprites[i].y > playerYpos)
+		{
+			sprites[i].y--;
+		}
+		
+		
+		if (sprites[i].y < playerYpos)
+		{
+			sprites[i].y++;
+		}
+	}
+	
+	
+	if (decision == 100)
+	{
+		//move toward player x and y
+
+		
+		if (sprites[1].x > playerXpos)
+		{
+			sprites[1].x--;
+		}
+		if (sprites[1].x < playerXpos)
+		{
+			sprites[1].x++;
+		}
+		if (sprites[1].y > playerYpos)
+		{
+			sprites[1].y--;
+		}
+		if (sprites[1].y < playerYpos)
+		{
+			sprites[1].y++;
+		}
+		
+	}
+	
+	/*{
+	//retreat from player
+	if (sprites[i].x > playerXpos)
+	{
+	sprites[i].x++;
+	}
+	if (sprites[i].x  playerYpos)
+	{
+	sprites[i].y++;
+	}
+	if (sprites[i].y < playerYpos)
+	{
+	sprites[i].y--;
+	}
+	}*/
+}
+

@@ -1,0 +1,22 @@
+void startingPosition (short levelPositioning[])
+{
+	short xxx = levelPositioning[0];// to be used for output
+	short yyy = levelPositioning[1];
+	short Level = levelPositioning[2];
+
+	if (Level == 0)
+	{
+
+		xxx = 50;
+		yyy = 120;//yyy = 16;
+		M_OUTP(0xfe, 2);//changes border color
+	}
+	
+	//to adjust to scale.
+	xxx = xxx * 256;
+	yyy = yyy * 256;
+	
+	//returns
+	levelPositioning[0] = xxx;
+	levelPositioning[1] = yyy;	
+}

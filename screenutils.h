@@ -79,6 +79,3 @@ void printtester99(unsigned char *info)
 	PrintStr(text, 821);
 }
 
-
-
-

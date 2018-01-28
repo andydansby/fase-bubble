@@ -3,7 +3,10 @@
 #include  "fase.h"//our sprite library
 #include "spectrum.h"//spectrum related utilities
 #include "screenutils.h"
-#include <variables.h>
+#include "variables.h"
+#include "collision.h"
+#include "mapsandstart.h"
+
 //also wpoke
 //#include <math.h>
 
@@ -51,21 +54,9 @@ void remove_bullet(char k);
 
 void update_screen();
 
-void verticalEdge ();
-
-void horizontalEdge ();
-
-void enemyStart(short level);
-
 void moveMainCharacter(unsigned char movePlayer);
 
-void startingPosition (short levelPositioning[]);
 
-void obsticleCollision3 (unsigned char playerX, unsigned char playerY, unsigned char level, unsigned char x1[], unsigned char y1[]);
-
-void obsticleCollision4 (unsigned char playerX, unsigned char playerY, unsigned char level, unsigned char x1[], unsigned char y1[]);
-
-void readScreenTiles (unsigned char x1[], unsigned char y1[], unsigned char tileAttribute[]);
 
 /*
 unsigned int RND(unsigned int range) {
@@ -221,7 +212,7 @@ main()
 		
 		if( i==0x1e )//press 1, select kempston joystick
 		{
-			Input= Joystick;
+			Input = Joystick;
 			//kempston joystick
 			//zx interface 2, port 1
 			break;
@@ -229,14 +220,14 @@ main()
 		
 		else if( i==0x1d )//press 2, select cursor joystick
 		{
-			Input= Cursors;
+			Input = Cursors;
 			//cursor joystick
 			break;
 		}
 		
 		else if( i==0x1b )//press 3, select keyboard control
 		{
-			Input= Keyboard;
+			Input = Keyboard;
 			//QAOP space
 			break;
 		}
@@ -260,6 +251,10 @@ main()
 	*shadow= 0;	
 	
 	movePlayer = 0;
+	
+	enemySlowDown = 0;
+	enemySpeedUp = 20;
+	lives = 2;
 	
 	//artificial stupidity part 2
 	enemyData[0] = 0;
@@ -309,6 +304,7 @@ main()
 	*screen= 0;
 	
 	while(1)//game loop
+	//while (lives > 0)
 	{
 		// this causes the engine to process a frame generating the scenario		
 		FRAME;// we seem to have to refresh again when we read the tiles
@@ -339,6 +335,8 @@ main()
 			
 			//artificial stupidity part 2
 			//unsigned char enemyData{4} = {0,0,0,0};//used to send enemy AI to function
+			
+			update_screen();
 			
 			romCounter = 0;//randomize function
 		}
@@ -373,12 +371,15 @@ main()
 						
 						//start a timer for each sprite hit, timer should start at 5 seconds initially
 						
+						//temp
+						lives --;//you are killed anytime you hit an enemy
 						
 						
 						//tiles[tmpy * scrw + tmpx]= 66;//where enemy dies??
 						//tilepaint(tmpx, tmpy, tmpx, tmpy);
 						
-						Sound(EFFX, 1+killed++%5);				
+						//Sound(EFFX, 1+killed++%5);//registers how many enemies are killed
+						
 						*drwout= (unsigned int)update_scoreboard;
 					}
 				}
@@ -415,10 +416,7 @@ main()
 
 				}
 				
-				
-				
-				
-				
+
 				//sprites[i].x && sprites[i].y == direction of sprites
 				//sprites[i].n == The .n is the number of the sprite 
 				//(will draw a different sprite if changed
@@ -460,6 +458,7 @@ main()
 			buildMap = 0;			
 			isLevelRead = 0;//reset flag to re read level
 				goto start;
+			//break;
 		}
 		
 
@@ -548,9 +547,7 @@ main()
 			movePlayer ++;
 			if (movePlayer > 16) movePlayer = 0;
 			moveMainCharacter(movePlayer);			
-		}
-
-	
+		}	
 	}
 	
 }//end of game loop
@@ -558,336 +555,10 @@ main()
 
 
 
-//Check vertical border / edges
-void verticalEdge ()
-{
-	//mapx is char
-	//mapy is char
-
-	vy += ay;
-	y += vy;
-	
-	if( vy + 8 >> 3 )
-	{
-		ay = -vy >> 3;
-	}
-	else
-	{
-		ay = vy = 0;
-	}
-
-	if( (unsigned int)y > scrh << 12 )
-	{
-		if( vy > 0 )
-		{
-			if( mapy < maph - 1 )
-			{
-				y = scrh << 12;
-				vy= 0;
-				zx_border(3);
-			}
-		}
-
-		//top
-		if( vy < 0 )
-		{
-			if( mapy < 8)
-			{
-				y = 0;
-				zx_border(3);
-			}
-		}
-
-		//screen bottom
-		if( vy > scrh)
-		{
-			y = scrh << 4;
-			zx_border(6);
-		}
-	}
-}
-
-//Check horizontal border / edges
-void horizontalEdge ()
-{
-	//mapx is char
-	//mapy is char
-
-	vx += ax;
-	x += vx;
-
-	if( vx + 8 >> 3 )
-	{
-		ax = -vx >> 3;
-	}
-	else
-	{
-		ax = vx = 0;
-	}
-
-	if( (unsigned int)x > scrw << 12 )
-	{
-		if( vx > 0 )
-		{
-			if( mapx < mapw - 2 )
-			{
-				x = scrw << 12;
-			}
-		}
-
-		//screen left
-		if( vx < 0 )
-		{
-			if( mapx < 16)
-			{
-				x = 24;
-				zx_border(6);
-			}
-		}
-
-		//screen right
-		if( vx > scrw)
-		{
-			x = scrw << 12;;
-			zx_border(6);
-		}
-	}
-}
-
-void readScreenTiles (unsigned char x1[], unsigned char y1[], unsigned char tileAttribute[])
-{
-	count = 0;
-	tile = 0;
-	attribute = 0;
-	
-	//FRAME;// we force update screen to be able to catch the tile-set for the attributes
-	// as per Antonio, tile array is unsigned char.
-	//scrw - screen width is constant
-	//unsigned char *tiles= 0x5b40;
-	//only called when isLevelRead == 0
-	
-	//clear out array from prior level
-	//have no more than 89 objects
-	//make everything 99, this is a trigger to stop
-	//scanning the tiles array to speed up
-	//collision detection
-	for (tile = 0; tile < 40; tile++)
-	{
-		x1[tile] = 99;
-		y1[tile] = 99;
-		tileAttribute[tile] = 99;
-	}
-	
-	//now test to make sure all are 99
-	//good
-	/*
-	for (tile = 0; tile < 40; tile++)
-	{
-		screenX = x1[tile];
-		screenY = y1[tile];
-		attribute = tileAttribute[tile];
-		
-		FRAME;
-		printtester2(tile, attribute);	
-		zx_border(2);
-		Pause (10);
-	}*/
-	count = 0;
-	tile = 0;
-	attribute = 0;
-	
-	
-	//screenX 0 to 15
-	//screenY 0 to 9
-	for ( screenY = 0; screenY < 10; screenY++)
-	{
-		for (screenX = 0; screenX < 16; screenX++)
-		{
-			attribute = tiles[screenY * scrw + screenX];
-
-			//if (checking the tile <> 0)
-			//tile 0 is a blank tile to travel
-		
-			//good
-			/*printtester1(attribute);
-			printtester2(screenX, screenY);			
-			FRAME;// we force update screen to be able to catch the tile-set for the attributes
-			zx_border(0);
-			Pause(15);*/
-			
-			
-			if ((attribute > 0) && (attribute < 99))
-			{
-				//mark the x & y position and place it 
-				//in the array
-				//this is where the problem lies
-				//writing to array x1
-				// check to make sure less than 99 as well
-				
-				x1[count] = screenX;
-				y1[count] = screenY;				
-				tileAttribute[count] = attribute;
-				
-				count++;//increment the counter for the next slot in array
-			}
-		}
-	}	
-	//now lets print back our values
-	
-	/*for (tile = 0; tile < 40; tile ++)
-	{
-		screenX = x1[tile];
-		screenY = y1[tile];
-		attribute = tileAttribute[tile];
-		printtester1(attribute);
-		printtester2(screenX, screenY);			
-		FRAME;// we force update screen to be able to catch the tile-set for the attributes
-		Pause (100);
-		
-		if (attribute == 99) break;// break out of the loop earlier if we encounter 99
-	}*/
-}
 
 
-
-//square detection
-void obsticleCollision3 (unsigned char playerX, unsigned char playerY, unsigned char level, unsigned char x1[], unsigned char y1[])
-{
-	objectRadius = 15;
-	
-	for (iterator = 0; iterator < 40; iterator ++)
-	{
-		screenX = x1[iterator];//screenX stepping through obsticle array
-		screenY = y1[iterator];//screenY stepping through obsticle array
-		attribute = tileAttribute[iterator];
-
-		//center point of the tiles
-		tmpx = (screenX * 16) + 8;
-		tmpy = (screenY * 16) + 8;
-		differenceX = abs(playerX - tmpx);
-		differenceY = abs(playerY - tmpy);
-
-		if ((differenceX < objectRadius) && (differenceY < objectRadius))
-		{
-			zx_border(6);
-			break;
-		}
-
-		if (attribute == 99) break;// break out of the loop earlier if we encounter 99
-	}
-}
-
-//circle detection
-void obsticleCollision4 (unsigned char playerX, unsigned char playerY, unsigned char level, unsigned char x1[], unsigned char y1[])
-{
-	objectRadius = 15;
-	
-	for (iterator = 0; iterator < 40; iterator ++)
-	{
-		screenX = x1[iterator];;//screenX stepping through obsticle array
-		screenY = y1[iterator];;//screenY stepping through obsticle array
-		attribute = tileAttribute[iterator];
-
-		//center point of the tiles
-		xx1 = (screenX * 16) + 8;
-		yy1 = (screenY * 16) + 8;
-	
-		//differences between the objects
-		differenceX = abs(playerX - xx1);
-		differenceY = abs(playerY - yy1);
-		
-		//now square the objects
-		squaredDifferenceX = differenceX * differenceX;
-		squaredDifferenceY = differenceY * differenceY;
-		
-		//now square the radius
-		//This could be done outside the loop as the radius don't change
-		squaredRadius = objectRadius * objectRadius;
-	
-		//Pythagoras theorm
-		if ( ( squaredDifferenceX ) + ( squaredDifferenceY ) < objectRadius * objectRadius )
-		{
-			zx_border(6);
-			
-			//force a break below as we have already found a collision
-			//needs to be the last line in this if statement
-			attribute = 99;
-		}
-
-		if (attribute == 99) break;// break out of the loop earlier if we encounter 99
-	}	
-}
-
-
-void startingPosition (short levelPositioning[])
-{
-	short xxx = 0;// = levelPositioning[0];// to be used for output
-	short yyy = 0;// = levelPositioning[1];
-	short Level = levelPositioning[2];
-
-	if (Level == 0)
-	{
-		//xxx = 50;
-		//yyy = 120;//yyy = 16;
-		//xxx = 200;
-		//yyy = 24;//yyy = 16;
-		
-		xxx = 200;
-		yyy = 55;
-	}
-	
-	//to adjust to scale.
-	xxx = xxx * 256;
-	yyy = yyy * 256;
-	
-	//returns
-	levelPositioning[0] = xxx;
-	levelPositioning[1] = yyy;	
-}
-
-
-void enemyStart(short level)
-{
-	short Level = level;
-	
-	if (Level == 0)
-	{
-		//enemy 1 - 8, 8, 8, 3
-		data[4] = 8;//n 
-		data[5] = 16;//x position
-		data[6] = 16;//y position
-		data[7] = 2;//sprite number
-		
-		//enemy 2 - 9, 230, 8, 3		
-		data[8] = 16;
-		data[9] = 224;//x position
-		data[10] = 8;//y position
-		data[11] = 3;//sprite number
-		
-		//enemy 3 - 10, 5, 150, 1		
-		data[12] = 10;
-		data[13] = 16;//x position
-		data[14] = 140;//y position
-		data[15] = 1;//sprite number
-		
-		//enemy 2 - 12, 230, 150, 2		
-		data[16] = 12;
-		data[17] = 224;//x position
-		data[18] = 140;//y position
-		data[19] = 2;//sprite number
-		M_OUTP(0xfe, 1);//changes border color
-	}
-	
-	//comes after the level data is set to initilize sprites
-	for ( i = 0; i < 5; i++ )
-	{
-		sprites[i].n = data[0 | i<<2],
-		sprites[i].x = data[1 | i<<2],
-		sprites[i].y = data[2 | i<<2],
-		sprites[i].f = data[3 | i<<2];
-	}
-}
-
+//this routine has issues with Calling via non-function pointer 
+//Input() is non-function pointer
 void moveMainCharacter(unsigned char movePlayer)
 {
 	unsigned char spriteFrame;
@@ -961,7 +632,7 @@ void update_scoreboard()
 	unsigned int scr, dst;
 	char count;
 	
-	scr= 0x3d80+killed*8;
+	scr = 0x3d80 + killed * 8;
 	
 	//PrintStr("cadena", 321);
 	dst= 0x403e|*shadow<<8;
@@ -982,9 +653,3 @@ void update_screen()
 			sprites[j].n -= 0x80;
 	}
 }
-
-
-
-
-
-eof

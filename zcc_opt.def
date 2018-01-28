@@ -1,27 +1,24 @@
 
-IF !DEFINED_ANSIstdio
-	defc	DEFINED_ANSIstdio = 1
-	defc ANSIstdio = 0
+IF !DEFINED_CRT_ORG_CODE
+	defc	DEFINED_CRT_ORG_CODE = 1
+	defc CRT_ORG_CODE = 32772
+	IFNDEF CRT_ORG_CODE
+	ENDIF
 ENDIF
 
 
-IF !DEFINED_CLIB_MALLOC_HEAP_SIZE 
-	defc	DEFINED_CLIB_MALLOC_HEAP_SIZE  = 1
-	defc CLIB_MALLOC_HEAP_SIZE  = 10000
+IF !DEFINED_CRT_printf_format
+	defc	DEFINED_CRT_printf_format = 1
+	defc CRT_printf_format = 0x00001201
+ELSE
+	UNDEFINE temp_printf_format
+	defc temp_printf_format = CRT_printf_format
+	UNDEFINE CRT_printf_format
+	defc CRT_printf_format = temp_printf_format | 0x00001201
 ENDIF
 
 
-IF !DEFINED_myzorg
-	DEFINE DEFINED_myzorg
-	defc myzorg = 32772
-ENDIF
-IF !NEED_floatpack
-	DEFINE	NEED_floatpack
-ENDIF
-
-
-IF !DEFINED_ministdio
-	defc	DEFINED_ministdio = 1
-	defc ministdio = 0
+IF !NEED_printf
+	DEFINE	NEED_printf
 ENDIF
 

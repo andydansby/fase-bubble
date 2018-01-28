@@ -1,0 +1,138 @@
+void obsticleCollision (unsigned char playerX, unsigned char playerY, unsigned char level)
+{	
+	//these are going to be hard numbers
+	//in the shapes of the boxes that surround
+	//the obsticle.
+	
+	if (level == 0)
+	{		
+		if (playerX > 43 && playerX < 69 && playerY > 43 && playerY < 69)
+		{
+			zx_border(6);
+		}		
+		printtester2(playerX,playerY);
+	}
+}
+
+
+
+void obsticleCollision (unsigned char playerX, unsigned char playerY, unsigned char level)
+{
+	
+	//these are going to be hard numbers
+	//in the shapes of the boxes that surround
+	//the obsticle.
+	
+	
+	
+	if (level == 0)
+	{
+		x1[0] = 43;
+		x2[0] = 69;
+		y1[0] = 43;
+		y2[0] = 69;
+	}
+
+	for (iterator = 0; iterator < 150; iterator++)
+	{
+		xx1 = x1[iterator];
+		xx2 = x2[iterator];
+		yy1 = y1[iterator];
+		yy2 = y2[iterator];
+		
+		//if (playerX > xx1 && playerX < xx2 && playerY > yy1 && playerY < yy2)
+		if (playerX > xx1)
+			if (playerX < xx2)
+				if (playerY > yy1)
+					if(playerY < yy2)
+					{
+						zx_border(6);
+					}
+		xx1 = xx2 = yy1 = yy2 = 255;
+	}
+	
+	
+	printtester2(playerX,playerY);
+}
+
+
+//works
+	if (level == 0)
+	{
+		x1[0] = 43;
+		x2[0] = 69;
+		y1[0] = 43;
+		y2[0] = 69;
+	}
+	
+	for (iterator = 0; iterator < 150; iterator++)
+	{
+		xx1 = x1[iterator];
+		xx2 = x2[iterator];
+		yy1 = y1[iterator];
+		yy2 = y2[iterator];
+		
+		//if (playerX > xx1 && playerX < xx2 && playerY > yy1 && playerY < yy2)
+		if (playerX > x1[0])
+			if (playerX < x2[0])
+				if (playerY > y1[0])
+					if(playerY < y2[0])
+					{
+						zx_border(6);
+					}
+		xx1 = xx2 = yy1 = yy2 = 255;
+	}
+	
+	
+	
+void obsticleCollision (unsigned char playerX, unsigned char playerY, unsigned char level)
+{	
+	//these are going to be hard numbers
+	//in the shapes of the boxes that surround
+	//the obstacle.	
+	if (level == 0)
+	{
+		//array is edges of rectangles
+		//x=4,y=4
+		//starting at 1
+		//so 4*16=64
+		//based on character position 16x16
+		x1[0] = 4;
+		y1[0] = 4;
+		
+		x1[1] = 8;
+		y1[1] = 5;
+		
+		x1[2] = 13;
+		y1[2] = 8;
+		
+		//red block is tile 10
+		//try 
+		//x = 12
+		//y = 2
+		
+		x1[5] = 99;
+	}	
+	for (iterator = 0; iterator < 50; iterator++)
+	{
+
+		xx1 = (x1[iterator]<<4) -24;// xx1 = (x1[iterator]*16) - 24;
+		xx2 = (x1[iterator]<<4) + 8;// xx2 = (x1[iterator]*16) + 8;
+		yy1 = (y1[iterator]<<4) -24;// yy1 = (y1[iterator]*16) - 24;
+		yy2 = (y1[iterator]<<4) + 8;// yy2 = (y1[iterator]*16) + 8;
+		
+		if (playerX > xx1 && playerX < xx2 && playerY > yy1 && playerY < yy2)
+		{
+			zx_border(6);
+		}
+		
+		if (x1[iterator] == 99)
+			break;
+	}	
+	printtester2(playerX,playerY);
+	//#define gettile(x,y) tiles[x + (y << 4) - y ]
+	
+	if (gettile(playerX, playerY) == 10)
+		zx_border(4);
+	
+}

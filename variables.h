@@ -4,7 +4,7 @@
 
 //extern long heap(50000);
 //#pragma output CLIB_MALLOC_HEAP_SIZE = 10000
-
+//#pragma output STACKPTR = 64000 
 
 unsigned char data[20]= 
 {
@@ -75,8 +75,10 @@ short isLevelRead;//used to read each level when loaded in memory
 //short tile;
 
 
-char enemySlowDown = 0;
-char enemySpeedUp = 20;
+char enemySlowDown;
+char enemySpeedUp;
+
+unsigned char lives;
 
 unsigned char playerXpos;//player X position 0-255
 unsigned char playerYpos;//player Y position 0-172
