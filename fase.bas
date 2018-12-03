@@ -1,79 +1,79 @@
-#include "build\define.h"
+#ifndef __LIBRARY_FASE__
+#include "build/define.h"
+#define __LIBRARY_FASE__
 
+#define Init        \
+    asm             \
+        call $fffc  \
+    end asm
 
+#define Frame       \
+    asm             \
+        call $fff9  \
+    end asm
 
-#define tilepaint(from_x, from_y, to_x, to_y) *repaint= from_x|from_y<<4|to_x<<8|to_y<<12
+#define Exit        \
+    asm             \
+        call $fff6  \
+    end asm
 
+#define DisableInt  \
+    asm             \
+        di          \
+    end asm
 
-#define Bitmap(func, param) CallBitmap(func|param<<8)
+#define EnableInt   \
+    asm             \
+        ei          \
+    end asm
 
+#define SetSpriteV(number, value)   poke $5b00+(number)*4, (value)
+#define GetSpriteV(number)          peek ($5b00+(number)*4)
+#define SetSpriteX(number, value)   poke $5b01+(number)*4, (value)
+#define GetSpriteX(number)          peek ($5b01+(number)*4)
+#define SetSpriteY(number, value)   poke $5b02+(number)*4, (value)
+#define GetSpriteY(number)          peek ($5b02+(number)*4)
+#define SetSpriteZ(number, value)   poke $5b03+(number)*4, (value)
+#define GetSpriteZ(number)          peek ($5b03+(number)*4)
+  
+#define SetBulletX(number, value)   poke $5b30+(number)*2, (value)
+#define GetBulletX(number)          peek ($5b30+(number)*2)
+#define SetBulletY(number, value)   poke $5b31+(number)*2, (value)
+#define GetBulletY(number)          peek ($5b31+(number)*2)
+#define SetTile(number, value)      poke $5b40+(number), (value)
+#define GetTile(number)             peek ($5b40+(number))
+#define TilePaint(from_x, from_y, to_x, to_y) repaint= CAST(uinteger, from_x|from_y<<4)|CAST(uinteger, to_x|to_y<<4)<<8
+#define Bitmap(func, param)         CallBitmap(func|param<<8)
+
+#define EFFX  4
+#define STOP  7
+#define LOAD  10
 #define sKEY  $427f
 #define QKEY  $42fb
 #define AKEY  $42fd
 #define OKEY  $4adf
 #define PKEY  $42df
-
 #define RIGHT 1
 #define LEFT  2
 #define DOWN  4
 #define UP    8
 #define FIRE  16
 
-#define INIT  asm("call 0xfffc")//starts fase
-#define FRAME asm("call 0xfff9")
-#define EXIT  asm("call 0xfff6")//stops fase
-
-#define EI    asm("ei")
-#define DI    asm("di")
-
-#define EFFX  4
-#define STOP  7
-#define LOAD  10
-
-
-//new
-//#define FASE_RUNNING 1//unneeded?
-//#define FASE_STOPPED 0//unneeded?
-//unsigned char fase_status = FASE_STOPPED;//unneeded?
-unsigned char speccy128k;
-unsigned char faseRunning;
-
-#define false 0
-#define true 1
-
 #if player
-  #define Sound(func, param) CallSound(func|param<<8)
+  #define Sound(func, param) callsound(func|CAST(uinteger, param)<<8)
 #else
   #define Sound(func, param)
 #endif
 
-typedef struct {
-  unsigned char n;
-  unsigned char x;
-  unsigned char y;
-  unsigned char f;
-} SPRITE;
+dim scr     as ubyte    at $5c00
+dim shadow  as ubyte    at $5c01
+dim repaint as uinteger at $5c02
+dim drwout  as uinteger at $5c06
+dim intadr  as uinteger at $fff5
+dim is128   as ubyte    at $fff7
 
-typedef struct {
-  unsigned char x;
-  unsigned char y;
-} BULLET;
-
-SPRITE *sprites= 0x5b00;
-BULLET *bullets= 0x5b30;
-unsigned char  *tiles = 0x5b40;//23360 - 23455
-unsigned char *screen = 0x5c00;//23552
-unsigned char *shadow = 0x5c01;//23553
-unsigned int *repaint = 0x5c02;//used in tilepaint
-unsigned int  *drwout = 0x5c06;//used to display text in either 128 or 48k modes
-unsigned char  *is128= 0xfff7;
-unsigned int  *intadr= 0xfff5;
-unsigned char  *zxmem= 0;
-
-void *Input;
-
-char Joystick ( void ){
-    #asm
+function FASTCALL Joystick () as ubyte
+  asm
         ld      bc, $effe
         in      b, (c)
         in      a, ($1f)
@@ -94,11 +94,11 @@ char Joystick ( void ){
         or      c
         and     $1f
         ld      l, a
-    #endasm
-}
+  end asm
+end function
 
-char Cursors ( void ){
-    #asm
+function FASTCALL Cursors () as ubyte
+  asm
         ld      a, $ef
         in      a, ($fe)
         ld      b, a
@@ -120,11 +120,11 @@ char Cursors ( void ){
         cpl
         and     $1f
         ld      l, a
-    #endasm
-}
+  end asm
+end function
 
-char Keyboard ( void ){
-    #asm
+function FASTCALL Keyboard () as ubyte
+  asm
         ld      hl, tabla
         ld      c, $fe
         ld      e, 0
@@ -140,15 +140,21 @@ keyb2:  ld      b, (hl)
         inc     hl
         ld      (keyb1+1), a
         djnz    keyb
-        ld      l, e
+        ld      a, e
         ret
 tabla:  defw    sKEY, QKEY, AKEY, OKEY, PKEY
         defb    1
-    #endasm
-}
+  end asm
+end function
 
-void Redefine ( void ){
-    #asm
+function FASTCALL Inputs () as ubyte
+  asm
+        defb    $c3, 0
+  end asm
+end function
+
+sub FASTCALL Redefine ()
+  asm
 redef:  xor     a
         in      a, ($fe)
         or      $e0
@@ -195,17 +201,23 @@ rede6:  ld      de, 4
 rede7:  inc     hl
         inc     hl
         jr      rede2
-rede8:  defm    "Fire", 0
-        defm    " Up ", 0
-        defm    "Down", 0
-        defm    "Left", 0
-        defm    "Right", 0
-        defm    "     ", 0
-    #endasm
-}
+rede8:  defb    "Fire"
+        defb    0
+        defb    " Up "
+        defb    0
+        defb    "Down"
+        defb    0
+        defb    "Left"
+        defb    0
+        defb    "Right"
+        defb    0
+        defb    "     "
+        defb    0
+  end asm
+end sub
 
-void __FASTCALL__ Pause ( unsigned int msecs ){
-    #asm
+sub FASTCALL pausa( time as uinteger )
+  asm
 loop1:  ld      bc, 21
 loop2:  djnz    loop2
         dec     c
@@ -214,11 +226,11 @@ loop2:  djnz    loop2
         ld      a, l
         or      h
         jr      nz, loop1
-    #endasm
-}
+  end asm
+end sub
 
-void __FASTCALL__ CallBitmap ( unsigned int source ){
-    #asm
+sub FASTCALL CallBitmap ( source as uinteger )
+  asm
         ld      c, h
         ld      a, $ff
         ld      d, a
@@ -265,12 +277,12 @@ void __FASTCALL__ CallBitmap ( unsigned int source ){
         pop     hl
         pop     de
         jp      dzx7a
-    #endasm
-}
+  end asm
+end sub
 
 #if player
-void __FASTCALL__ CallSound ( unsigned int source ){
-    #asm
+sub FASTCALL callsound( source as uinteger )
+  asm
         ld      a, ($fff7)
         or      a
         jr      z, beep
@@ -298,12 +310,11 @@ beep:   ld      a, l
         ldi
         ld      a, (hl)
         ld      (de), a
-    #endasm
-}
-
-void __FASTCALL__ IsrSound ( void ){
-    #asm
-        ex      af, af
+  end asm
+end sub
+sub FASTCALL IsrSound ()
+  asm
+        ex      af, af'
         push    ix
         push    bc
         ld      bc, $7ffd
@@ -316,68 +327,19 @@ void __FASTCALL__ IsrSound ( void ){
         out     (c), a
         pop     bc
         pop     ix
-        ex      af, af
+        ex      af, af'
         ei
-    #endasm
-}
-#else
-void __FASTCALL__ IsrSound ( void );
+  end asm
+end sub
 #endif
 
-/*void __CALLEE__ PrintStr128 ( char *string, unsigned char x, unsigned char y ){
-    #asm
+sub FASTCALL PrintStr( source as uinteger, xy as uinteger )
+  asm
         pop     af
         pop     de
-        pop     bc
-        pop     ix
         push    af
-        ld      hl, ($5c00)
-        ld      a, e
-        and     $18
-        or      $40
-        or      h
-        ld      h, a
-        ld      a, e
-        rrca
-        rrca
-        rrca
-        and     $e0
-        add     a, c
-        ld      l, a
-print3:
-		ex      de, hl
-        ld      a, (ix)
-        inc     ix
-        add     a, a
-        ret     z
-        ld      l, a
-        ld      h, $0f
-        add     hl, hl
-        add     hl, hl
-        ld      b, 4
-print4: 
-		ld      a, (hl)
-        ld      (de), a
-        inc     l
-        inc     d
-        ld      a, (hl)
-        ld      (de), a
-        inc     l
-        inc     d
-        djnz    print4
-        ld      hl, $f801
-        add     hl, de
-        jr      print3
-    #endasm
-}
-*/
-
-void __CALLEE__ PrintStr ( char *string, unsigned int xy ){
-    #asm
-        pop     af
-        pop     de
+        push    hl
         pop     ix
-        push    af
         ld      hl, ($5c00)
 print:  ld      a, e
         and     $18
@@ -392,7 +354,7 @@ print:  ld      a, e
         add     a, d
         ld      l, a
 print1: ex      de, hl
-        ld      a, (ix)
+        ld      a, (ix+0)
         inc     ix
         add     a, a
         ret     z
@@ -413,16 +375,7 @@ print2: ld      a, (hl)
         ld      hl, $f801
         add     hl, de
         jr      print1
-    #endasm
-}
+  end asm
+end sub
 
-
-void __CALLEE__ Dzx7b ( unsigned int source, unsigned int addr ){
-    #asm
-        pop     af
-        pop     de
-        pop     hl
-        push    af
-        jp      dzx7a
-    #endasm
-}
+#endif
